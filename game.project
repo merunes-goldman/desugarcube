@@ -1,0 +1,10 @@
+[project]
+title = desugarcube
+version = 0.1.0
+
+[bootstrap]
+main_collection = /main/release.collectionc
+
+[library]
+include_dirs = desugarcube
+
