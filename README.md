@@ -12,7 +12,7 @@ Or point to the ZIP file of a specific release.
 - python3 alias in $PATH
 
 ## Editor Script
-This library provides converter for [SugarCube](http://www.motoslave.net/sugarcube/2/) ([TWINE](https://twinery.org/2/)) html format to json.
+This library provides [SugarCube](http://www.motoslave.net/sugarcube/2/) ([TWINE](https://twinery.org/2/)) html to json converter.
 
 #### DeSugarcube
-Context menu item, available for _*.html_ files, generates _*.json_.
+Context menu item, available for _*.html_, generates _*.json_.

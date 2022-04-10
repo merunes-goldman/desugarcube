@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from functools import lru_cache, partial
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union, cast
 
 
 class Support:
@@ -46,16 +46,49 @@ class Support:
         return {name: (value if name not in as_list else Support.str_to_list(value, sep=',')) for name, value in attrs if name not in exclude and value is not None and len(value) > 0}
 
     @staticmethod
-    def data_to_expressions(data: str) -> List[Dict[str, str]]:
+    def data_to_expressions(data: str, *, version: Literal['v1', 'v2'] = 'v2') -> List[Dict[str, str]]:
         expressions_block, _ = Support.str_to_pair(data, sep='--')
         expressions_pairs = map(partial(Support.str_to_pair, sep=':'), Support.str_to_list(expressions_block))
-        expressions = [{'name': name, 'value': value} for name, value in expressions_pairs]
 
-        for expression in expressions:
-            if expression['value'] is None or len(expression['value']) == 0:
-                raise IOError(f"Found unbound expression: {expression['name']}")
+        if version == 'v1':
+            expressions_v1 = []
 
-        return cast(List[Dict[str, str]], expressions)
+            for name, value in expressions_pairs:
+                if value is None or len(value) == 0:
+                    raise IOError(f"Found unbound expression: {name}")
+
+                expressions_v1.append({'name': name, 'value': value})
+
+            return expressions_v1
+        elif version == 'v2':
+            expressions_v2 = []
+
+            for name, value in expressions_pairs:
+                if value is None or len(value) == 0:
+                    raise IOError(f"Found unbound expression: {name}")
+
+                if value[0] == value[-1] == "'":
+                    expressions_v2.append({'name': name, 'type': 'set', 'value': value})
+                else:
+                    left_plus_term, right_plus_term = Support.str_to_pair(value, sep='+')
+                    left_minus_term, right_minus_term = Support.str_to_pair(value, sep='-')
+
+                    if right_plus_term is not None:
+                        if left_plus_term != name:
+                            raise IOError(f"Found unsupported expression: {name}")
+
+                        expressions_v2.append({'name': name, 'type': 'add', 'value': right_plus_term})
+                    elif right_minus_term is not None:
+                        if left_minus_term != name:
+                            raise IOError(f"Found unsupported expression: {name}")
+
+                        expressions_v2.append({'name': name, 'type': 'add', 'value': f"-{right_minus_term}"})
+                    else:
+                        expressions_v2.append({'name': name, 'type': 'set', 'value': value})
+
+            return expressions_v2
+        else:
+            raise NotImplementedError(f"Supported versions: 'v1', 'v2'; passed '{version}'")
 
     @staticmethod
     @lru_cache
