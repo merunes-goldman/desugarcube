@@ -9,7 +9,7 @@ Or point to the ZIP file of a specific release.
 
 ## Requirements
 - python 3.8+
-- python3 alias in $PATH
+- python alias in $PATH
 
 ## Editor Script
 This library provides [SugarCube](http://www.motoslave.net/sugarcube/2/) ([TWINE](https://twinery.org/2/)) html to json converter.

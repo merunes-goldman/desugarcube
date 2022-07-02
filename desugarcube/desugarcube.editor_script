@@ -20,12 +20,21 @@ function M.get_commands()
             run = function(opts)
                 local path = editor.get(opts.selection, "path")
 
-                return {
-                    {
-                        action = "shell",
-                        command = {"python3", "-u", "-c", editor.get("/desugarcube/impl/desugarcube.py", "text"), path:sub(2)}
+                if editor.platform == "x86_64-win32" then
+                    return {
+                        {
+                            action = "shell",
+                            command = {"python", "-u", "-c", "\"" .. editor.get("/desugarcube/impl/desugarcube.py", "text") .. "\"", path:sub(2)}
+                        }
                     }
-                }
+                else
+                    return {
+                        {
+                            action = "shell",
+                            command = {"python", "-u", "-c", editor.get("/desugarcube/impl/desugarcube.py", "text"), path:sub(2)}
+                        }
+                    }
+                end
             end
         }
     }
